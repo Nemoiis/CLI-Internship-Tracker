@@ -22,7 +22,7 @@ I built this to get hands-on with `sqlite3`: creating tables, running parameteri
 ## Getting Started
 
 ```bash
-git clone https://github.com/Nemoiis/internship-tracker.git
+git clone https://github.com/Nemoiis/CLI-Internship-Tracker.git
 cd internship-tracker
 python tracker.py
 ```
