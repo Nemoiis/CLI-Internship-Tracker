@@ -66,7 +66,7 @@ def delete_entry():
     cur.execute(f"DELETE FROM applications WHERE custID = {delete}")
     con.commit()
     
-    return "That shi gone GANGSTA"
+    return "Result Deleted."
     
 def view_companies(rows):
     if not rows:
