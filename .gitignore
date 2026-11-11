@@ -1,0 +1,6 @@
+# Local application data
+tracker.db
+
+# Python
+__pycache__/
+*.pyc
