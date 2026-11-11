@@ -1,10 +1,15 @@
 import sqlite3
+import datetime
 
 # ============================================================
 # CONFIG
 # ============================================================
 
 WIDTH = 40
+x = datetime.datetime.now()
+year = x.strftime("%Y")
+day = x.strftime("%d")
+month = x.strftime("%m")
 
 
 # ============================================================
@@ -16,7 +21,7 @@ cur = con.cursor()
 cur.execute('''CREATE TABLE IF NOT EXISTS applications
             (custID INTEGER PRIMARY KEY,
             company TEXT NOT NULL,
-            role INT NOT NULL,
+            role TEXT NOT NULL,
             status TEXT NOT NULL,
             date TEXT NOT NULL)''')
 
@@ -32,7 +37,7 @@ def show_menu():
         ("3", "Filter by Status"),
         ("4", "Add a Entry"),
         ("5", "Update a Entries Status"),
-        ("6", "Delete a movie"),
+        ("6", "Delete a Entry"),
         ("0", "Exit"),
     ]
     print("\n╔" + "═" * WIDTH + "╗")
@@ -58,7 +63,20 @@ def view_companies(rows):
 # INPUT HELPERS
 # ============================================================
 
-def statusCheck(numStatus):
+def getStatus():
+    while True:
+        try:
+            numStatus = int(input("Enter 1 (Applied), 2 (Interview), 3 (Offer), or 4 (Rejected): \n"))
+
+            if numStatus >= 1 and numStatus <= 4:
+                break
+
+            else:
+                print("Please use an appropriate number.")
+
+        except ValueError:
+            print("Please only type the number options provided")
+
     if numStatus == 1:
         return "Applied"
 
@@ -70,8 +88,8 @@ def statusCheck(numStatus):
 
     elif numStatus == 4:
         return "Rejected"
-
-
+    
+ 
 # ============================================================
 # DATABASE ACTIONS
 # ============================================================
@@ -79,18 +97,8 @@ def statusCheck(numStatus):
 def add_entry():
         company = input("Enter the Company name: \n")
         role = input("Enter the role name: \n")
-        date = input("Enter the date you applied: \n")
-
-        while True:
-            numStatus = int(input("Enter 1 (Applied), 2 (Interview), 3 (Offer), or 4 (Rejected): \n"))
-
-            if numStatus >= 1 and numStatus <= 4:
-                break
-
-            else:
-                print("Please use an appropriate number.")
-
-        status = statusCheck(numStatus)
+        date = f"{year}/{month}/{day}"
+        status = getStatus()
 
         cur.execute('''INSERT INTO applications (company, role, status, date)
         VALUES ( ?, ?, ?, ?)''', (company, role, status, date))
@@ -103,7 +111,7 @@ def delete_entry():
     delete = int(input("Enter ID of what you want to delete: "))
 
 
-    cur.execute(f"DELETE FROM applications WHERE custID = {delete}")
+    cur.execute("DELETE FROM applications WHERE custID = ?", (delete,))
     con.commit()
 
     return "Result Deleted."
@@ -140,18 +148,21 @@ def main():
 
         # [3] Filter by status
         elif choice == "3":
-            while True:
-                numStatus = int(input("Enter 1 (Applied), 2 (Interview), 3 (Offer), or 4 (Rejected): \n"))
+            option = input("What would you like to filter by (Status or Date): ").lower()
+            
+            if option == "status":
+                statusfilter = getStatus()
+                cur.execute("SELECT * FROM applications WHERE status LIKE ?", (f"%{statusfilter}%",))
+                view_companies(cur.fetchall())
 
-                if numStatus >= 1 and numStatus <= 4:
-                    break
+            elif option == "date":
+                datefilter = input("Enter date in YYYY/MM/DD format: ")
+                cur.execute("SELECT * FROM applications where date like ?", (f"%{datetime}%",))
+                view_companies(cur.fetchall())
 
-                else:
-                    print("Please use an appropriate number.")
+            else:
+                print("No entries found.")
 
-            status = statusCheck(numStatus)
-            cur.execute("SELECT * FROM applications WHERE status LIKE ?", (f"%{status}%",))
-            view_companies(cur.fetchall())
 
         # [4] Add an entry
         elif choice == "4":
@@ -159,24 +170,17 @@ def main():
 
         # [5] Update an entry's status
         elif choice == "5":
-            choice = input("Enter the ID of the status you would like to update: ")
+            entry_id = input("Enter the ID of the status you would like to update: ")
             print("\n")
-
-            while True:
-                numStatus = int(input("Enter 1 (Applied), 2 (Interview), 3 (Offer), or 4 (Rejected): \n"))
-
-                if numStatus >= 1 and numStatus <= 4:
-                    break
-
-                else:
-                    print("Please use an appropriate number.")
-
-            status = statusCheck(numStatus)
+            status = getStatus()
 
             cur.execute('''
             UPDATE applications
             SET status = ? WHERE custID = ?
-            ''', (status, choice))
+            ''', (status, entry_id))
+
+            con.commit()
+            print(f"{str(cur.rowcount)} row(s) were updated")
 
         # [6] Delete an entry
         elif choice == "6":
