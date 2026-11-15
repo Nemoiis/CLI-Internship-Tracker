@@ -56,11 +56,11 @@ def view_companies(rows):
         print("\nNo results.")
         return
 
-    print(f"\n{'ID':<5}{'Company':<15}{'Role':<15}{'Status':<12}Date")
-    print("-" * 57)
+    print(f"\n{'ID':<5}{'Company':<25}{'Role':<35}{'Status':<12}Date")
+    print("-" * 87)
 
     for custID, company, role, status, date in rows:
-        print(f"{custID:<5}{company:<15}{role:<15}{status:<12}{date}")
+        print(f"{custID:<5}{company:<25}{role:<35}{status:<12}{date}")
 
 
 # ============================================================
